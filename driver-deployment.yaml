@@ -1,0 +1,56 @@
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   name: driver-api
+# ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: driver-api-v1
+  labels:
+    app: driver-api
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app: driver-api
+        version: v1
+  template:
+    metadata:
+      labels:
+        app: driver-api
+        version: v1
+      annotations:
+    spec:
+      # serviceAccountName: driver-api    
+      containers:
+      - name: driver-api
+        image: nicholasjackson/fake-service:v0.7.8
+        ports:
+        - containerPort: 8080
+        env:
+        - name: "LISTEN_ADDR"
+          value: "0.0.0.0:8080"
+        - name: "NAME"
+          value: "driver-api-v1"
+        - name: "SERVER_TYPE"
+          value: "http"
+        - name: "MESSAGE"
+          value: "Hello From driver-api-v1!"
+
+---
+# Service to expose driver-api-v1 frontend
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: driver-api
+spec:
+  selector:
+    app: driver-api
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
